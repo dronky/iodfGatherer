@@ -1,0 +1,58 @@
+/*REXX***************************************************************** 00010000
+ *                                                                      00020000
+ * (C) Copyright IBM Corp. 2000 - All Rights Reserved.                  00030000
+ *                                                                      00040000
+ * DISCLAIMER OF WARRANTIES.  The following [enclosed] code is sample   00050000
+ * code created by IBM Corporation. This sample code is not part of     00060000
+ * any standard or IBM product and is provided to you solely for the    00070000
+ * purpose of assisting you in the development of your applications.    00080000
+ * The code is provided "AS IS", without warranty of any kind.          00090000
+ * IBM shall not be liable for any damages arising out of your use of   00100000
+ * the sample code,  even if they have been advised of the possibility  00110000
+ * of such damages.                                                     00120000
+ *                                                                      00130000
+ *===================================================================== 00140000
+ *                                                                      00150000
+ * purpose: wait for input and read from a non-blocking socket.         00160000
+ *                                                                      00170000
+ * parms  : sock     = socket handle (integer number).                  00180000
+ *          timeOut  = time to wait for input on the specified socket   00190000
+ *                     in sec.                                          00200000
+ *                     A timeout value of 0 means endless wait.         00210000
+ *                                                                      00220000
+ * return : number of read bytes, or zero if timeout has been reached,  00230000
+ *          followed by the received text, if any.                      00240000
+ */                                                                     00250000
+                                                                        00260000
+parse arg sock, timeOut                                                 00270000
+                                                                        00280000
+if \dataType(timeOut, 'N') then                                         00290000
+   timeOut = 0                                                          00300000
+                                                                        00310000
+recvText = ''                                                           00320000
+recvSize = 0                                                            00330000
+rList    = ''                                                           00340000
+                                                                        00350000
+do until strip(rList) \= '' ! timeOut = 0                               00360000
+   parse value Socket('Select', 'READ' sock, 1),                        00370000
+      with RC . rest                                                    00380000
+   if RC = 0 then                                                       00390000
+      parse var rest 'READ' rList 'WRITE'                               00400000
+   timeOut = timeOut - 1                                                00410000
+end                                                                     00420000
+                                                                        00430000
+if timeOut = 0 then                                                     00440000
+   return 0                                                             00450000
+                                                                        00460000
+do until size < 10                                                      00470000
+   parse value Socket('Recv', sock, 10),                                00480000
+      with RC size text                                                 00490000
+   if RC = 0 then do                                                    00500000
+      if size > 0 then do                                               00510000
+         recvText = recvText !! text                                    00520000
+         recvSize = recvSize + size                                     00530000
+      end                                                               00540000
+   end                                                                  00550000
+end                                                                     00560000
+                                                                        00570000
+return recvSize recvText                                                00580000

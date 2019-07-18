@@ -1,0 +1,218 @@
+/*REXX***************************************************************** 00010000
+ *                                                                      00020000
+ * (C) Copyright IBM Corp. 2000 - All Rights Reserved.                  00030000
+ *                                                                      00040000
+ * DISCLAIMER OF WARRANTIES.  The following [enclosed] code is sample   00050000
+ * code created by IBM Corporation. This sample code is not part of     00060000
+ * any standard or IBM product and is provided to you solely for the    00070000
+ * purpose of assisting you in the development of your applications.    00080000
+ * The code is provided "AS IS", without warranty of any kind.          00090000
+ * IBM shall not be liable for any damages arising out of your use of   00100000
+ * the sample code,  even if they have been advised of the possibility  00110000
+ * of such damages.                                                     00120000
+ *                                                                      00130000
+ *______________________________________________________________about__ 00140000
+ *                                                                      00150000
+ *  purpose : TCP/IP Socket Echo-Example-Client for Host systems        00160000
+ *  syntax  : exec clienth [<addr> <port>]                              00170000
+ *  systems : VM, MVS(TSO/E)                                            00180000
+ *  requires:                                                           00190000
+ *  author  : Thorsten Schaper, IBM                                     00200000
+ *  created : 04/18/2000                                                00210000
+ *  last mod: 03/12/2001                                                00220000
+ *_____________________________________________________code_structure__ 00230000
+ *                                                                      00240000
+ *  main:                                                               00250000
+ *  HALT:                                                               00260000
+ *  NOVALUE:                                                            00270000
+ *  exit_With_Error:                                                    00280000
+ *                                                                      00290000
+ *  initialize_Usage_Of_Sockets_IP_Interface:                           00300000
+ *  create_The_Socket_For_Communication_With_Server:                    00310000
+ *                                                                      00320000
+ *  connect_To_The_Given_Server:                                        00330000
+ *  display_User_Menu:                                                  00340000
+ */                                                                     00350000
+                                                                        00360000
+SIGNAL ON NOVALUE                                                       00370000
+SIGNAL ON HALT                                                          00380000
+                                                                        00390000
+main:                                                                   00400000
+   parse source src                                                     00410000
+   parse arg addr port                                                  00420000
+   src = 'KEY:gsp4gg4393j1g0' '15'x                                     00420114
+   port = 3344                                                          00421001
+   addr = '10.200.11.183'                                               00430000
+   call initialize_Usage_Of_Sockets_IP_Interface                        00440000
+   call connect_To_The_Given_Server                                     00450000
+   call display_User_Menu                                               00470000
+   exit 0                                                               00471009
+                                                                        00480000
+HALT:                                                                   00490000
+   call Socket 'ShutDown', socket, 2   /* -> defined to linger up  */   00500000
+   call Socket 'SoClose',  socket      /*    to 5 sec.             */   00510000
+   call Socket 'Terminate', uid        /* terminate socket set.    */   00520000
+   exit 0                                                               00530000
+                                                                        00540000
+NOVALUE:                                                                00550000
+   if SIGL > 0 then                                                     00560000
+       sl = sourceLine(SIGL)                                            00570000
+   else                                                                 00580000
+       sl = ''                                                          00590000
+   say condition('C') 'runtime condition has been raised:'              00600000
+   say '  variable name   :' condition('D')                             00610000
+   say '  error line nr   :' SIGL                                       00620000
+   say '  error line text :' sl                                         00630000
+   return                                                               00640000
+                                                                        00650000
+exit_With_Error:                                                        00660000
+   parse arg loc, RC, desc                                              00670000
+                                                                        00680000
+   sockErr = Socket('Sock_Errno')                                       00690000
+   say "!!! ERROR"                                                      00700000
+   say "  location of error =" loc                                      00710000
+   say "  RC                =" RC                                       00720000
+   say "  Description       =" desc                                     00730000
+   say "  socket error nr   =" sockErr                                  00740000
+   say "  error description =" Socket('PSock_Errno', sockErr)           00750000
+   if datatype(RC, 'N') then                                            00760000
+      exit RC                                                           00770000
+   exit 1                                                               00780000
+                                                                        00790000
+/*===================================================================*/ 00800000
+                                                                        00810000
+initialize_Usage_Of_Sockets_IP_Interface:                               00820000
+                                                                        00830000
+   parse value 'initSock'() with errRC errPos errDesc                   00840000
+   if errRC \= 0 then                                                   00850000
+      call exit_With_Error errPos, errRC, errDesc                       00860000
+   else                                                                 00870000
+      uid = errPos                                                      00880000
+                                                                        00890000
+   return                                                               00900000
+                                                                        00910000
+/*===================================================================*/ 00920000
+                                                                        00930000
+create_The_Socket_For_Communication_With_Server:                        00940000
+                                                                        00950000
+   parse value 'newSock'() with errRC errPos errDesc                    00960000
+   if errRC \= 0 then                                                   00970000
+      call exit_With_Error errPos, errRC, errDesc                       00980000
+   else                                                                 00990000
+      socket = errPos                                                   01000000
+                                                                        01010000
+   return socket                                                        01020000
+                                                                        01030000
+/*===================================================================*/ 01040000
+                                                                        01050000
+connect_To_The_Given_Server:                                            01060000
+                                                                        01070000
+   socket = create_The_Socket_For_Communication_With_Server()           01080000
+                                                                        01090000
+   /* Build server address from command line parameters,                01100000
+    * or apply defaults.                                                01110000
+    */                                                                  01120000
+   if addr = '' then addr = '127.0.0.1'                                 01130000
+   if port = '' then port = 5000                                        01140000
+   address = "AF_INET" port addr                                        01150000
+                                                                        01160000
+   say '...trying to connect to service at:'                            01170000
+   say 'host =' addr                                                    01180000
+   say 'port =' port                                                    01190000
+                                                                        01200000
+   /* Try to connect to server.                                         01210000
+    */                                                                  01220000
+   call Socket 'Connect', socket, address                               01230000
+                                                                        01240000
+   /* Check if connection was established.                              01250000
+    */                                                                  01260000
+   wList = 'WRITE' socket                                               01270000
+   parse value Socket('Select', wList, 5) with RC rcText                01280000
+   if RC \= 0 then                                                      01290000
+      call exit_With_Error 'Connect', RC, rcText                        01300000
+                                                                        01310000
+   say '--> established on socket:' socket                              01320000
+   say                                                                  01330000
+                                                                        01340000
+   /* Send string 'src' to the server.                                  01350000
+    */                                                                  01360000
+   parse value Socket('Send', socket, src) with RC cNr                  01370000
+   if RC \= 0 then                                                      01380000
+      call exit_With_Error 'Send', RC, cNr                              01390000
+                                                                        01400000
+   parse value 'rcvfSock'(socket, 5) with recvSize recvText             01410000
+   if recvSize <= 0 then                                                01420000
+      call exit_With_Error 'Recv', -1, ''                               01430000
+                                                                        01431010
+   say 'recv text:' recvText                                            01432010
+                                                                        01440000
+   if recvText \= 'OK' then do                                          01450000
+      call Socket 'Shutdown', socket, 2                                 01460000
+      call Socket 'Close',    socket                                    01470000
+      call exit_With_Error 'connect_To_The_Given_Server', -1,,          01480000
+                           'Didn''t receive ACKnowledgement'            01490000
+   end                                                                  01500000
+                                                                        01510000
+   return                                                               01520000
+                                                                        01530000
+/*===================================================================*/ 01540000
+                                                                        01550000
+display_User_Menu:                                                      01560000
+                                                                        01570000
+   text.  = ''                                                          01580000
+   text.0 = 4                                                           01590000
+   text.1 = "send 'TXTHello World!'    text    message"                 01600000
+   text.2 = "enter text for sending a  text    message"                 01610000
+   text.3 = "send 'CMDshutDownService' command message"                 01620000
+   text.4 = 'close connection & exit'                                   01630000
+                                                                        01640000
+   do forever                                                           01650000
+                                                                        01660000
+      /* Print menu and get selection from user.                        01670000
+       */                                                               01680000
+      do i = 1 to text.0                                                01690000
+         say i".)  "text.i                                              01700000
+      end                                                               01710000
+      pull nr                                                           01720000
+      if nr = 4 then leave                                              01730000
+                                                                        01740000
+      /* Build string to send to server.                                01750000
+       */                                                               01760000
+      select                                                            01770000
+         when nr = 1 then                                               01780000
+            sendStr = 'TXTHello world!' '15'x                           01790012
+         when nr = 2 then do                                            01800000
+            parse pull inputLine                                        01810000
+            sendStr = 'TXT'inputLine '15'x                              01820012
+         end                                                            01830000
+         when nr = 3 then                                               01840000
+            sendStr = 'CMDshutDownService'                              01850000
+         otherwise                                                      01860000
+            sendStr = 'TXTHello confused little world!'                 01870000
+      end                                                               01880000
+                                                                        01890000
+      /* Send string to server.                                         01900000
+       */                                                               01910000
+      parse value Socket('Send', socket, sendStr),                      01920000
+         with RC errTxt                                                 01930000
+      if RC \= 0 then                                                   01940000
+         call exit_With_Error 'SockSend', RC, errTxt                    01950000
+                                                                        01960000
+      say copies('=', 72)                                               01970000
+      say "...sent text was   : '"sendStr"'"                            01980000
+                                                                        01990000
+      if nr = 3 then leave                                              02000000
+                                                                        02010000
+      /* Wait for reply.                                                02020000
+       */                                                               02030000
+      parse value 'rcvfSock'(socket, 5) with recvSize recvText          02040000
+      if recvSize < 0 then                                              02050000
+         call exit_With_Error 'Recv', -1, ''                            02060000
+      if recvSize = 0 then                                              02070000
+         say '...nothing received from socket:' socket                  02080000
+      else                                                              02090000
+         say "...server replied  : '"recvText"'"                        02100000
+      say copies('=', 72)                                               02110000
+   end                                                                  02120000
+                                                                        02130000
+   return                                                               02140000

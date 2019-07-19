@@ -3,6 +3,8 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class FtpClient {
     private String server;
@@ -35,16 +37,23 @@ public class FtpClient {
         ftp.login(user, password);
         ftp.doCommand("site file=jes", "");
 
-        String x = "//TEST     JOB (A00,000),'EXTEND CP',CLASS=Q,       \n" +
-            "//             MSGCLASS=P,LINES=150000,BYTES=999999 \n" +
-            "//VERIFY   EXEC  PGM=IEBGENER                       \n" +
-            "//*                                                 \n" +
-            "//SYSPRINT DD DUMMY                                 \n" +
-            "//SYSUT2   DD SYSOUT=A                              \n" +
-            "//SYSIN    DD DUMMY                                 \n" +
-            "//SYSUT1   DD *                                     \n" +
-            "    SAMPLE TEST OUTPUT STATEMENT 1                  \n" +
-            "//*                                                 ";
+        String client = new String(Files.readAllBytes(Paths.get("SOCKCLI")));
+
+        String x =
+            "//A09TST  JOB A09,MAKARENKO,NOTIFY=&SYSUID,MSGCLASS=Z\n" +
+            "//STEP2     EXEC  PGM=IEBGENER                       \n" +
+            "//SYSIN     DD  DUMMY                                \n" +
+            "//SYSPRINT  DD  SYSOUT=*                             \n" +
+            "//SYSUT2    DD  DSN=&&ABC(AA),DISP=(,PASS),          \n" +
+            "//        SPACE=(CYL,(20,,2)),DCB=(RECFM=FB)         \n" +
+            "//SYSUT1    DD  *                                    \n" +
+            client                                            +  "\n" +
+            "//RUNREXX  EXEC PGM=IKJEFT01,PARM='AA'               \n" +
+            "//SYSEXEC   DD DSN=&&ABC,DISP=(SHR,DELETE)           \n" +
+            "//SYSTSPRT  DD SYSOUT=*                              \n" +
+            "//SYSTSIN   DD *                                     \n" +
+            "/*                                                   \n" +
+            "//                                                   ";
 
         ByteArrayInputStream bais = new ByteArrayInputStream(x.getBytes());
 

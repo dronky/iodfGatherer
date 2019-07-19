@@ -8,12 +8,7 @@ import java.util.Objects;
 
 public class Server {
 
-    /**
-     * @param args
-     * @throws InterruptedException
-     */
-
-    public static void main(String[] args) throws InterruptedException {
+    public static void start() throws InterruptedException {
 //  стартуем сервер на порту 3345
         StringBuilder line = new StringBuilder();
         try (ServerSocket server = new ServerSocket(3344)) {

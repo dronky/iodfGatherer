@@ -3,10 +3,26 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws InterruptedException, IOException {
 
-//        FtpClient ftpClient = new FtpClient("sys4", 21, "a09", "a09");
-//        ftpClient.open();
-//        ftpClient.close();
+        Thread serverListener = new Thread(() -> {
+            try {
+                Server.start();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
 
-                Server.main(args);
+        serverListener.start();
+
+        Thread ftpThread = new Thread(() -> {
+            FtpClient ftpClient = new FtpClient("ts01", 21, "a09", "a09");
+            try {
+                ftpClient.open();
+                ftpClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+        ftpThread.start();
     }
 }

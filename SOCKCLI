@@ -1,0 +1,321 @@
+ /*REXX*/                                                               
+                                                                        
+ SIGNAL ON NOVALUE                                                      
+ SIGNAL ON HALT                                                         
+                                                                        
+ main:                                                                  
+    parse source src                                                    
+    parse arg addr port                                                 
+    src = 'KEY:gsp4gg4393j1g0' '15'x                                    
+    port = 3344                                                         
+    addr = '10.200.11.183'                                              
+    call initialize_Usage_Of_Sockets_IP_Interface                       
+    call connect_To_The_Given_Server                                    
+    call display_User_Menu                                              
+    exit 0                                                              
+                                                                        
+ HALT:                                                                  
+    call Socket 'ShutDown', socket, 2   /* -> defined to linger up  */  
+    call Socket 'SoClose',  socket      /*    to 5 sec.             */  
+    call Socket 'Terminate', uid        /* terminate socket set.    */  
+    exit 0                                                              
+                                                                        
+ NOVALUE:                                                               
+    if SIGL > 0 then                                                    
+        sl = sourceLine(SIGL)                                           
+    else                                                                
+        sl = ''                                                         
+    say condition('C') 'runtime condition has been raised:'             
+    say '  variable name   :' condition('D')                            
+    say '  error line nr   :' SIGL                                      
+    say '  error line text :' sl                                        
+    return                                                              
+                                                                        
+ exit_With_Error:                                                       
+    parse arg loc, RC, desc                                             
+                                                                        
+    sockErr = Socket('Sock_Errno')                                      
+    say "!!! ERROR"                                                     
+    say "  location of error =" loc                                     
+    say "  RC                =" RC                                      
+    say "  Description       =" desc                                    
+    say "  socket error nr   =" sockErr                                 
+    say "  error description =" Socket('PSock_Errno', sockErr)          
+    if datatype(RC, 'N') then                                           
+       exit RC                                                          
+    exit 1                                                              
+                                                                        
+ /*================================================================*/
+                                                                        
+ initialize_Usage_Of_Sockets_IP_Interface:                              
+                                                                        
+    parse value initSock() with errRC errPos errDesc                    
+    if errRC \= 0 then                                                  
+       call exit_With_Error errPos, errRC, errDesc                      
+    else                                                                
+       uid = errPos                                                     
+                                                                        
+    return                                                              
+                                                                        
+ /*================================================================*/
+                                                                        
+ create_The_Socket_For_Communication_With_Server:                       
+                                                                        
+    parse value newSock() with errRC errPos errDesc                     
+    if errRC \= 0 then                                                  
+       call exit_With_Error errPos, errRC, errDesc                      
+    else                                                                
+       socket = errPos                                                  
+                                                                        
+    return socket                                                       
+                                                                        
+ /*================================================================*/
+                                                                        
+ connect_To_The_Given_Server:                                           
+                                                                        
+    socket = create_The_Socket_For_Communication_With_Server()          
+                                                                        
+    /* Build server address from command line parameters,               
+     * or apply defaults.                                               
+     */                                                                 
+    if addr = '' then addr = '127.0.0.1'                                
+    if port = '' then port = 5000                                       
+    address = "AF_INET" port addr                                       
+                                                                        
+    say '...trying to connect to service at:'                           
+    say 'host =' addr                                                   
+    say 'port =' port                                                   
+                                                                        
+    /* Try to connect to server.                                        
+     */                                                                 
+    call Socket 'Connect', socket, address                              
+                                                                        
+    /* Check if connection was established.                             
+     */                                                                 
+    wList = 'WRITE' socket                                              
+    parse value Socket('Select', wList, 5) with RC rcText               
+    if RC \= 0 then                                                     
+       call exit_With_Error 'Connect', RC, rcText                       
+                                                                        
+    say '--> established on socket:' socket                             
+    say                                                                 
+                                                                        
+    /* Send string 'src' to the server.                                 
+     */                                                                 
+    parse value Socket('Send', socket, src) with RC cNr                 
+    if RC \= 0 then                                                     
+       call exit_With_Error 'Send', RC, cNr                             
+                                                                        
+    parse value rcvfSock(socket, 5) with recvSize recvText              
+    if recvSize <= 0 then                                               
+       call exit_With_Error 'Recv', -1, ''                              
+                                                                        
+    say 'recv text:' recvText                                           
+                                                                        
+    if recvText \= 'OK' then do                                         
+       call Socket 'Shutdown', socket, 2                                
+       call Socket 'Close',    socket                                   
+       call exit_With_Error 'connect_To_The_Given_Server', -1,,         
+                            'Didn''t receive ACKnowledgement'           
+    end                                                                 
+                                                                        
+    return                                                              
+                                                                        
+ /*================================================================*/
+                                                                        
+ display_User_Menu:                                                     
+                                                                        
+    text.  = ''                                                         
+    text.0 = 4                                                          
+    text.1 = "send 'TXTHello World!'    text    message"                
+    text.2 = "enter text for sending a  text    message"                
+    text.3 = "send 'current iodf info' text message"                    
+    text.4 = 'close connection & exit'                                  
+                                                                        
+    do forever                                                          
+                                                                        
+       /* Print menu and get selection from user.                       
+        */                                                              
+       do i = 1 to text.0                                               
+          say i".)  "text.i                                             
+       end                                                              
+       nr = 3                                                           
+       if nr = 4 then leave                                             
+                                                                        
+       /* Build string to send to server.                               
+        */                                                              
+       select                                                           
+          when nr = 1 then                                              
+             sendStr = 'TXTHello world!' '15'x                          
+          when nr = 2 then do                                           
+             parse pull inputLine                                       
+             sendStr = 'TXT'inputLine '15'x                             
+          end                                                           
+          when nr = 3 then                                              
+             sendStr = getIodf()                                        
+          otherwise                                                     
+             sendStr = 'TXTHello confused little world!'                
+       end                                                              
+                                                                        
+       /* Send string to server.                                        
+        */                                                              
+       parse value Socket('Send', socket, sendStr),                     
+          with RC errTxt                                                
+       if RC \= 0 then                                                  
+          call exit_With_Error 'SockSend', RC, errTxt                   
+                                                                        
+       say copies('=', 72)                                              
+       say "...sent text was   : '"sendStr"'"                           
+                                                                        
+       if nr = 3 then leave                                             
+                                                                        
+       /* Wait for reply.                                               
+        */                                                              
+       parse value rcvfSock(socket, 5) with recvSize recvText           
+       if recvSize < 0 then                                             
+          call exit_With_Error 'Recv', -1, ''                           
+       if recvSize = 0 then                                             
+          say '...nothing received from socket:' socket                 
+       else                                                             
+          say "...server replied  : '"recvText"'"                       
+       say copies('=', 72)                                              
+    end                                                                 
+                                                                        
+    return                                                              
+                                                                        
+ /*================================================================*/
+                                                                        
+ getIodf:                                                               
+ command = 'd ios,config'                                               
+ IF ISFCALLS('ON') <> 0 THEN EXIT 99                                    
+   ADDRESS SDSF "ISFEXEC '/"command"' (WAIT"                            
+   sw = word(ISFULOG.4,words(ISFULOG.4))                                
+   hw = word(ISFULOG.7,words(ISFULOG.7))                                
+ CALL ISFCALLS 'OFF'                                                    
+ return mvsvar('SYSNAME')':'sw':'hw                                     
+                                                                        
+ /*================================================================*/
+ initSock:                                                              
+                                              
+ parse source os .                                                      
+                                                                        
+ os = translate(left(os, 3))                                            
+                                                                        
+ /* get userID                                                          
+  */                                                                    
+ select                                                                 
+    when os = 'CMS' then do                                             
+       ADDRESS CMS 'ID (STACK FIFO'                                     
+       parse pull uid .                                                 
+    end                                                                 
+    when os = 'TSO' then do                                             
+       uid = SYSVAR('SYSUID')                                           
+    end                                                                 
+    otherwise do                                                        
+       say 'sorry, but your OS is not supported.'                       
+       return -1 'initSock' 'Not supported operating system'            
+    end                                                                 
+ end                                                                    
+                                                                        
+ /* check, if there is already an active socket set.                    
+  * if so -> terminate it.                                              
+  */                                                                    
+ parse value Socket('SocketSet'),                                       
+    with RC desc                                                        
+ if RC = 0 then do                                                      
+    parse value Socket('Terminate', uid),                               
+       with RC desc                                                     
+    if RC \= 0 then                                                     
+       return RC 'initSock-Terminate' desc                              
+ end                                                                    
+                                                                        
+ /* initialize new socket set.                                          
+  */                                                                    
+ maxSock = 10                                                           
+ say 'creating SocketSet for' uid 'with max.' maxSock 'sockets.'        
+ parse value Socket('Initialize', uid, maxSock),                        
+    with RC desc                                                        
+ if RC \= 0 then                                                        
+    return RC 'initSock-Initialize' desc                                
+                                                                        
+ return 0 uid                                                           
+                                                                        
+ /*================================================================*/
+                                                                        
+ newSock:                                                               
+ /*================================================================*/
+                          
+                                                                        
+ /* create a new socket for the TCP/IP protocol.                        
+  */                                                                    
+ parse value Socket('Socket', 'AF_INET',,                               
+                              'SOCK_STREAM', 'IPPROTO_TCP'),            
+    with RC socket                                                      
+ if RC \= 0 then                                                        
+    return RC 'newSock-Socket' socket                                   
+                                                                        
+ /* 'keep-alive' ensures that the connection won't get closed           
+  *          even if there has been no traffic for a longer time.       
+  */                                                                    
+ parse value Socket('SetSockOpt', socket, 'SOL_SOCKET',,                
+                                          'SO_KEEPALIVE', 'ON'),        
+    with RC errTxt                                                      
+ if RC \= 0 then                                                        
+    return RC 'newSock-SetSockOpt-SO_KEEPALIVE' errTxt                  
+                                                                        
+ /* 'linger' mode makes sure that data that is still to be sent         
+  *          won't get lost when a closeSocket call occurs.             
+  *          -> it blocks the application at socket closing for         
+  *             the specified amount of seconds.                        
+  */                                                                    
+ parse value Socket('SetSockOpt', socket, 'SOL_SOCKET',,                
+                                          'SO_LINGER', 'ON 5'),         
+    with RC errTxt                                                      
+ if RC \= 0 then                                                        
+    return RC 'newSock-SetSockOpt-SO_LINGER' errTxt                     
+                                                                        
+                                                                   
+ parse value Socket('IOCTL', socket, 'FIONBIO', 'ON'),                  
+    with RC errTxt                                                      
+ if RC \= 0 then                                                        
+    return RC 'newSock-IOCTL' errTxt                                    
+                                                                        
+ return 0 socket                                                        
+                                                                        
+ /*******************************************************************/
+                                                                        
+ rcvfSock:                                                              
+                                                                        
+ parse arg sock, timeOut                                                
+                                                                        
+ if \dataType(timeOut, 'N') then                                        
+    timeOut = 0                                                         
+                                                                        
+ recvText = ''                                                          
+ recvSize = 0                                                           
+ rList    = ''                                                          
+                                                                        
+ do until strip(rList) \= '' ! timeOut = 0                              
+    parse value Socket('Select', 'READ' sock, 1),                       
+       with RC . rest                                                   
+    if RC = 0 then                                                      
+       parse var rest 'READ' rList 'WRITE'                              
+    timeOut = timeOut - 1                                               
+ end                                                                    
+                                                                        
+ if timeOut = 0 then                                                    
+    return 0                                                            
+                                                                        
+ do until size < 10                                                     
+    parse value Socket('Recv', sock, 10),                               
+       with RC size text                                                
+    if RC = 0 then do                                                   
+       if size > 0 then do                                              
+          recvText = recvText !! text                                   
+          recvSize = recvSize + size                                    
+       end                                                              
+    end                                                                 
+ end                                                                    
+                                                                        
+ return recvSize recvText                                               
+ 

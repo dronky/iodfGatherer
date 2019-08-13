@@ -35,10 +35,11 @@ public class FtpClient {
 
     void open() throws IOException {
         ftp = new FTPClient();
-        long threadId = Thread.currentThread().getId();
-        System.out.println(threadId+":FTP CLIENT started with sock port " + sockPort);
-        // DEBUG
-//        ftp.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));
+
+        //DEBUG
+        //        long threadId = Thread.currentThread().getId();
+        //        System.out.println(threadId+":FTP CLIENT started with sock port " + sockPort);
+        //        ftp.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));
 
         ftp.connect(server, port);
         int reply = ftp.getReplyCode();
@@ -53,13 +54,13 @@ public class FtpClient {
         String client = new String(Files.readAllBytes(Paths.get("SOCKCLI")));
         StringBuffer stringBuffer = new StringBuffer(client);
 
-        replace(stringBuffer,"#KEY#",key);
-        replace(stringBuffer,"#PORT#", String.valueOf(sockPort));
-        replace(stringBuffer,"#ADDR#",address);
-        replace(stringBuffer,"#CONSNAME#",console);
+        replace(stringBuffer, "#KEY#", key);
+        replace(stringBuffer, "#PORT#", String.valueOf(sockPort));
+        replace(stringBuffer, "#ADDR#", address);
+        replace(stringBuffer, "#CONSNAME#", console);
 
         String x =
-            "//IODFGATH  JOB DEV,IODFGATH,NOTIFY=&SYSUID,MSGCLASS="+msgclass+"\n" +
+            "//IODFGATH  JOB DEV,IODFGATH,MSGCLASS=" + msgclass + "\n" +
                 "//STEP2     EXEC  PGM=IEBGENER                       \n" +
                 "//SYSIN     DD  DUMMY                                \n" +
                 "//SYSPRINT  DD  SYSOUT=*                             \n" +
@@ -77,12 +78,12 @@ public class FtpClient {
         ByteArrayInputStream bais = new ByteArrayInputStream(x.getBytes());
 
 //        System.out.println("Start uploading first file");
-        ftp.storeUniqueFile("/tmp/"+sockPort, bais);
+        ftp.storeUniqueFile("/tmp/" + sockPort, bais);
     }
 
-    void replace(StringBuffer sb, String oldValue, String newValue){
+    void replace(StringBuffer sb, String oldValue, String newValue) {
         int index = sb.indexOf(oldValue);
-        sb.replace(index, index+oldValue.length(), newValue);
+        sb.replace(index, index + oldValue.length(), newValue);
     }
 
     void close() throws IOException {

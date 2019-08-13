@@ -10,17 +10,17 @@ public class Server {
 
     public static void start(int port, String key) throws InterruptedException {
         long threadId = Thread.currentThread().getId();
-        System.out.println(threadId+":Server started at port " + port);
+        System.out.println(threadId + ":Server started at port " + port);
 //  стартуем сервер на порту 3345
         StringBuilder line = new StringBuilder();
         try (ServerSocket server = new ServerSocket(port)) {
-// становимся в ожидание подключения к сокету под именем - "client" на серверной стороне                                
+// становимся в ожидание подключения к сокету под именем - "client" на серверной стороне
             Socket client = server.accept();
 
-// после хэндшейкинга сервер ассоциирует подключающегося клиента с этим сокетом-соединением             
+// после хэндшейкинга сервер ассоциирует подключающегося клиента с этим сокетом-соединением
 //            System.out.print("Connection accepted.");
 
-// инициируем каналы для  общения в сокете, для сервера     
+// инициируем каналы для  общения в сокете, для сервера
 
 // канал записи в сокет
             DataOutputStream out = new DataOutputStream(client.getOutputStream());
@@ -36,7 +36,7 @@ public class Server {
                 writeMessage("OK", out, threadId);
             }
 
-// начинаем диалог с подключенным клиентом в цикле, пока сокет не закрыт                
+// начинаем диалог с подключенным клиентом в цикле, пока сокет не закрыт
             while (!client.isClosed()) {
                 line.setLength(0);
 
@@ -48,22 +48,28 @@ public class Server {
                     line.append(buffer.readLine());
                 }
 
-                if (line.toString().trim().equalsIgnoreCase("KEY:"+key)) {
-                    System.out.println(threadId + ":client is trusted");
+                //TODO DELETE USELESS KEY VERIFICATION
+                if (line.toString().trim().equalsIgnoreCase("KEY:" + key)) {
+//                    System.out.println("Server thread " + threadId + ":client is trusted");
                     continue;
                 }
 
-                System.out.println(threadId + ":" + line);
                 writeMessage("Response from server. Current time:" + Instant.now(), out, threadId);
 
 // инициализация проверки условия продолжения работы с клиентом по этому сокету по кодовому слову       - quit
                 if (line.toString().equalsIgnoreCase("quit") || line.toString().equalsIgnoreCase("null")) {
-                    System.out.println(threadId + ":Client closed connection ...");
+                    System.out.println("Server thread " + threadId + ":Client closed connection ...");
                     out.writeUTF("Server reply - " + line + " - OK");
                     out.flush();
                     Thread.sleep(3000);
                     break;
                 }
+
+                if (line.toString().contains("$IODF:")) {
+                    System.out.println("\033[0;32m" + line + "\033[0m");
+                } else System.out.println("\033[0m" + "Server thread " + threadId + ":" + line);
+
+
             }
 
             // закрываем сначала каналы сокета !
@@ -77,7 +83,7 @@ public class Server {
             // хотя при многопоточном применении его закрывать не нужно
             // для возможности поставить этот серверный сокет обратно в ожидание нового подключения
 
-            System.out.println(threadId + ":Connections closed");
+            System.out.println("Server thread " + threadId + ":Connections closed");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,7 +92,7 @@ public class Server {
     private static void writeMessage(String msg, DataOutputStream out, long threadId) throws IOException {
         // Подтвердить подключение клиента
         out.write(msg.getBytes("CP037")); // get bytes for EBCDIC codepage 37
-        System.out.println(threadId + ":SERVER MESSAGE: " + msg + " SENT");
+//        System.out.println(threadId + ":SERVER MESSAGE: " + msg + " SENT");
         // освобождаем буфер сетевых сообщений (по умолчанию сообщение не сразу отправляется в сеть, а сначала накапливается в специальном буфере сообщений, размер которого определяется конкретными настройками в системе, а метод  - flush() отправляет сообщение не дожидаясь наполнения буфера согласно настройкам системы
         out.flush();
     }

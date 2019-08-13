@@ -9,3 +9,4 @@ Setup server.properties:
 - KEY = gsAGJ)Wss3 - random string key for client identification (should be removed later)
 - ADDRESS = 10.200.11.111 - Socket server ip address (your PC)
 - CONSOLE = DEV99 - unique console name for issuing SDSF commands
+- MSGCLASS - you can specify specific msgclass for rexx client job submission (for example, msgclass with automatic job purge)

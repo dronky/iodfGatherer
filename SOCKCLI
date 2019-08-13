@@ -6,9 +6,9 @@
  main:                                                                  
     parse source src                                                    
     parse arg addr port                                                 
-    src = 'KEY:gsp4gg4393j1g0' '15'x                                    
-    port = 3344                                                         
-    addr = '10.200.11.183'                                              
+    src = 'KEY:#KEY#' '15'x                                    
+    port = #PORT#                                                         
+    addr = '#ADDR#'                                              
     call initialize_Usage_Of_Sockets_IP_Interface                       
     call connect_To_The_Given_Server                                    
     call display_User_Menu                                              
@@ -185,13 +185,19 @@
                                                                         
  /*================================================================*/
                                                                         
- getIodf:                                                               
+ getIodf:               
+ /* set unique console name */ 
+ isfcons = 'DEV99'
  command = 'd ios,config'                                               
- IF ISFCALLS('ON') <> 0 THEN EXIT 99                                    
+ IF ISFCALLS('ON') <> 0 THEN EXIT 99      
+   ADDRESS SDSF "ISFEXEC 'SET CONSOLE DEV99' (WAIT"                            
    ADDRESS SDSF "ISFEXEC '/"command"' (WAIT"                            
+   say 'LOG LEN:'ISFULOG.0
+   say 'STR 1:'ISFULOG.1
    sw = word(ISFULOG.4,words(ISFULOG.4))                                
    hw = word(ISFULOG.7,words(ISFULOG.7))                                
- CALL ISFCALLS 'OFF'                                                    
+ CALL ISFCALLS 'OFF'                       
+ "CONSOLE DEACTIVATE" 
  return mvsvar('SYSNAME')':'sw':'hw                                     
                                                                         
  /*================================================================*/

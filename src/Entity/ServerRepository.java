@@ -1,11 +1,11 @@
 package Entity;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ServerRepository implements Repository<Server> {
 
+    private static volatile ServerRepository instance;
     List<Server> serverList;
 
     public ServerRepository() {
@@ -29,8 +29,8 @@ public class ServerRepository implements Repository<Server> {
     }
 
     @Override
-    public void get(int index) {
-        serverList.get(index);
+    public Server get(int index) {
+        return serverList.get(index);
     }
 
     @Override
@@ -42,4 +42,18 @@ public class ServerRepository implements Repository<Server> {
     public void remove(Server item) {
         serverList.remove(item);
     }
+
+    public static ServerRepository getInstance() {
+        ServerRepository result = instance;
+        if (result == null) {
+            synchronized (ServerRepository.class) {
+                result = instance;
+                if (result == null) {
+                    instance = result = new ServerRepository();
+                }
+            }
+        }
+        return instance;
+    }
+
 }

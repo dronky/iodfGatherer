@@ -5,11 +5,12 @@ public interface Repository<T> {
 
     void add(Iterable<T> items);
 
-    void get(int index);
+    T get(int index);
 
     void remove(T item);
 
     void remove(int index);
 
     int getCount();
+
 }

@@ -4,17 +4,26 @@ public class Server {
     private String hostname;
     private String login;
     private String password;
+    private String iodf;
+    private String hardwareIodf;
+    private String dateTime;
 
-    public Server(String hostname, String login, String password) {
+    public Server(String hostname, String login, String password, String iodf, String hardwareIodf, String dateTime) {
         this.hostname = hostname;
         this.login = login;
         this.password = password;
+        this.iodf = iodf;
+        this.hardwareIodf = hardwareIodf;
+        this.dateTime = dateTime;
     }
 
     public Server() {
         this.hostname = null;
         this.login = null;
         this.password = null;
+        this.iodf = null;
+        this.hardwareIodf = null;
+        this.dateTime = null;
     }
 
     public String getHostname() {
@@ -39,5 +48,29 @@ public class Server {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getIodf() {
+        return iodf;
+    }
+
+    public void setIodf(String iodf) {
+        this.iodf = iodf;
+    }
+
+    public String getHardwareIodf() {
+        return hardwareIodf;
+    }
+
+    public void setHardwareIodf(String hardwareIodf) {
+        this.hardwareIodf = hardwareIodf;
+    }
+
+    public String getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
     }
 }

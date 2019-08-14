@@ -4,13 +4,17 @@ import Entity.Server;
 import Entity.ServerRepository;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import service.GridPaneService;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
@@ -18,16 +22,7 @@ import java.util.stream.Stream;
 public class MainPanelController implements Initializable {
 
     @FXML
-    public GridPane grdPane1;
-
-    @FXML
-    public Button myButton;
-
-    @FXML
-    public TextField myTextField;
-
-    @FXML
-    public Text actiontarget;
+    public GridPane gridPane1;
 
     private ServerRepository serverRepository;
 
@@ -36,36 +31,50 @@ public class MainPanelController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         //TODO init statements
 
-        serverRepository = new ServerRepository();
+        serverRepository = ServerRepository.getInstance();
     }
 
     @FXML
     protected void addServerAction(ActionEvent event) {
-        int totalRows = getRowCount(grdPane1);
-        grdPane1.addRow(totalRows, new TextField("hostname"), new TextField("login"), new TextField("password"));
+        int totalRows = GridPaneService.getRowCount(gridPane1);
+        gridPane1.addRow(totalRows, new TextField("hostname"), new TextField("login"), new TextField("password"));
     }
 
     @FXML
     protected void removeServerAction(ActionEvent event) {
-        int totalRows = getRowCount(grdPane1) - 1;
-        if (totalRows > 1) grdPane1.getChildren().remove(totalRows * 3, totalRows * 3 + 3);
+        int totalRows = GridPaneService.getRowCount(gridPane1) - 1;
+        if (totalRows > 1) gridPane1.getChildren().remove(totalRows * 3, totalRows * 3 + 3);
     }
 
     @FXML
-    public void startServerAction(ActionEvent actionEvent) {
+    public void startServerAction(ActionEvent actionEvent) throws IOException {
         setSystems();
-        System.out.println(serverRepository);
+
+        //TODO pass system repo to result controller
+
         //        Main.main();
+        showResultPanel((Stage) gridPane1.getScene().getWindow());
     }
 
+    private void showResultPanel(Stage stage) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/view/result_panel.fxml"));
+        Scene scene = new Scene(root, 600, 400);
+
+        stage.setTitle("IODF gatherer results");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+
+    //add systems from view to systems repository
     private void setSystems() {
-        System.out.println(grdPane1.getChildren().size());
-        for (int i = 3; i < grdPane1.getChildren().size(); i += 3) {
+        System.out.println(gridPane1.getChildren().size());
+        for (int i = 3; i < gridPane1.getChildren().size(); i += 3) {
 
             Server server = new Server();
-            Node hostname = grdPane1.getChildren().get(i);
-            Node login = grdPane1.getChildren().get(i + 1);
-            Node password = grdPane1.getChildren().get(i + 2);
+            Node hostname = gridPane1.getChildren().get(i);
+            Node login = gridPane1.getChildren().get(i + 1);
+            Node password = gridPane1.getChildren().get(i + 2);
 
             if (Stream.of(hostname, login, password).allMatch(node -> node.isManaged() && node instanceof TextField)) {
                 server.setHostname(((TextField) hostname).getText());
@@ -75,19 +84,5 @@ public class MainPanelController implements Initializable {
 
             serverRepository.add(server);
         }
-    }
-
-    private int getRowCount(GridPane pane) {
-        int numRows = pane.getRowConstraints().size();
-        for (int i = 0; i < pane.getChildren().size(); i++) {
-            Node child = pane.getChildren().get(i);
-            if (child.isManaged()) {
-                Integer rowIndex = GridPane.getRowIndex(child);
-                if (rowIndex != null) {
-                    numRows = Math.max(numRows, rowIndex + 1);
-                }
-            }
-        }
-        return numRows;
     }
 }

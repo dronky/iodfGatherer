@@ -1,20 +1,20 @@
 package server;
 
+import Entity.Host;
+
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class Property {
 
-    static public String[] SYSTEMS = null;
     static public String KEY = null;
     static public String ADDRESS = null;
     static public String CONSOLE = null;
     static public String MSGCLASS = null;
     static public Set<Integer> PORTS = null;
+    static public List<Host> SERVERS = null;
 
     private static volatile Property instance;
 
@@ -24,7 +24,10 @@ public final class Property {
         try {
             FileInputStream fis_properties = new FileInputStream("server.properties");
             property.load(fis_properties);
-            SYSTEMS = property.getProperty("SYSTEMS").split(";");
+            String[] SYSTEMS = property.getProperty("SYSTEMS").split(";");
+            // CONVERT TO LIST
+            SERVERS = new ArrayList<>();
+            parseHostsToList(SYSTEMS);
             PORTS = Arrays.stream(property.getProperty("PORTS").split(";")).map(Integer::parseInt).collect(Collectors.toSet());
             KEY = property.getProperty("KEY");
             ADDRESS = property.getProperty("ADDRESS");
@@ -32,6 +35,20 @@ public final class Property {
             MSGCLASS = property.getProperty("MSGCLASS");
         } catch (IOException e) {
             System.err.println("Error occured while was reading properties file");
+        }
+    }
+
+    public static void setServers(List<Host> servers) {
+        Property.SERVERS = servers;
+    }
+
+    private void parseHostsToList(String[] systems) {
+        for (String system : systems) {
+            String[] credentials = system.split(":");
+            String host = credentials[0];
+            String login = credentials[1];
+            String password = credentials[2];
+            SERVERS.add(new Host(host,login,password));
         }
     }
 

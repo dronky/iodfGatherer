@@ -21,7 +21,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label maxWidth="1.7976931348623157E308" text="server">
+            <Label maxWidth="1.7976931348623157E308" text="host">
                <GridPane.margin>
                   <Insets left="5.0" right="5.0" />
                </GridPane.margin>

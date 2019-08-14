@@ -3,44 +3,44 @@ package Entity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServerRepository implements Repository<Server> {
+public class ServerRepository implements Repository<Host> {
 
     private static volatile ServerRepository instance;
-    List<Server> serverList;
+    List<Host> hostList;
 
     public ServerRepository() {
-        serverList = new ArrayList<>();
+        hostList = new ArrayList<>();
     }
 
     public int getCount(){
-        return serverList.size();
+        return hostList.size();
     }
 
     @Override
-    public void add(Server item) {
-        serverList.add(item);
+    public void add(Host item) {
+        hostList.add(item);
     }
 
     @Override
-    public void add(Iterable<Server> items) {
-        for (Server item : items) {
+    public void add(Iterable<Host> items) {
+        for (Host item : items) {
             add(item);
         }
     }
 
     @Override
-    public Server get(int index) {
-        return serverList.get(index);
+    public Host get(int index) {
+        return hostList.get(index);
     }
 
     @Override
     public void remove(int index) {
-        serverList.remove(index);
+        hostList.remove(index);
     }
 
     @Override
-    public void remove(Server item) {
-        serverList.remove(item);
+    public void remove(Host item) {
+        hostList.remove(item);
     }
 
     public static ServerRepository getInstance() {

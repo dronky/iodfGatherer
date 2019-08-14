@@ -1,6 +1,6 @@
 package Entity;
 
-public class Server {
+public class Host {
     private String hostname;
     private String login;
     private String password;
@@ -8,7 +8,7 @@ public class Server {
     private String hardwareIodf;
     private String dateTime;
 
-    public Server(String hostname, String login, String password, String iodf, String hardwareIodf, String dateTime) {
+    public Host(String hostname, String login, String password, String iodf, String hardwareIodf, String dateTime) {
         this.hostname = hostname;
         this.login = login;
         this.password = password;
@@ -17,7 +17,13 @@ public class Server {
         this.dateTime = dateTime;
     }
 
-    public Server() {
+    public Host(String hostname, String login, String password) {
+        this.hostname = hostname;
+        this.login = login;
+        this.password = password;
+    }
+
+    public Host() {
         this.hostname = null;
         this.login = null;
         this.password = null;

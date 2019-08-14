@@ -75,7 +75,7 @@
                                                                         
     socket = create_The_Socket_For_Communication_With_Server()          
                                                                         
-    /* Build server address from command line parameters,               
+    /* Build host address from command line parameters,
      * or apply defaults.                                               
      */                                                                 
     if addr = '' then addr = '127.0.0.1'                                
@@ -86,7 +86,7 @@
     say 'host =' addr                                                   
     say 'port =' port                                                   
                                                                         
-    /* Try to connect to server.                                        
+    /* Try to connect to host.
      */                                                                 
     call Socket 'Connect', socket, address                              
                                                                         
@@ -100,7 +100,7 @@
     say '--> established on socket:' socket                             
     say                                                                 
                                                                         
-    /* Send string 'src' to the server.                                 
+    /* Send string 'src' to the host.
      */                                                                 
     parse value Socket('Send', socket, src) with RC cNr                 
     if RC \= 0 then                                                     
@@ -142,7 +142,7 @@
        nr = 3                                                           
        if nr = 4 then leave                                             
                                                                         
-       /* Build string to send to server.                               
+       /* Build string to send to host.
         */                                                              
        select                                                           
           when nr = 1 then                                              
@@ -157,7 +157,7 @@
              sendStr = 'TXTHello confused little world!'                
        end                                                              
                                                                         
-       /* Send string to server.                                        
+       /* Send string to host.
         */                                                              
        parse value Socket('Send', socket, sendStr),                     
           with RC errTxt                                                
@@ -177,7 +177,7 @@
        if recvSize = 0 then                                             
           say '...nothing received from socket:' socket                 
        else                                                             
-          say "...server replied  : '"recvText"'"                       
+          say "...host replied  : '"recvText"'"
        say copies('=', 72)                                              
     end                                                                 
                                                                         
@@ -321,4 +321,3 @@
  end                                                                    
                                                                         
  return recvSize recvText                                               
- 

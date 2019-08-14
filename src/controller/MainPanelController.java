@@ -1,6 +1,6 @@
 package controller;
 
-import Entity.Server;
+import Entity.Host;
 import Entity.ServerRepository;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,10 +12,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import server.Main;
+import server.Property;
 import service.GridPaneService;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
@@ -24,14 +28,20 @@ public class MainPanelController implements Initializable {
     @FXML
     public GridPane gridPane1;
 
-    private ServerRepository serverRepository;
+    private Property property;
 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //TODO init statements
+        Property property = Property.getInstance();
+        int totalRows = GridPaneService.getRowCount(gridPane1);
+        for (int i = 0; i < property.SERVERS.size(); i++) {
+            gridPane1.addRow(totalRows + i,
+                new TextField(property.SERVERS.get(i).getHostname()),
+                new TextField(property.SERVERS.get(i).getLogin()),
+                new TextField(property.SERVERS.get(i).getPassword()));
+        }
 
-        serverRepository = ServerRepository.getInstance();
     }
 
     @FXML
@@ -52,7 +62,7 @@ public class MainPanelController implements Initializable {
 
         //TODO pass system repo to result controller
 
-        //        Main.main();
+        Main.main();
         showResultPanel((Stage) gridPane1.getScene().getWindow());
     }
 
@@ -69,20 +79,22 @@ public class MainPanelController implements Initializable {
     //add systems from view to systems repository
     private void setSystems() {
         System.out.println(gridPane1.getChildren().size());
+        List<Host> hosts = new ArrayList<>();
         for (int i = 3; i < gridPane1.getChildren().size(); i += 3) {
 
-            Server server = new Server();
+            Host host = new Host();
             Node hostname = gridPane1.getChildren().get(i);
             Node login = gridPane1.getChildren().get(i + 1);
             Node password = gridPane1.getChildren().get(i + 2);
 
             if (Stream.of(hostname, login, password).allMatch(node -> node.isManaged() && node instanceof TextField)) {
-                server.setHostname(((TextField) hostname).getText());
-                server.setLogin(((TextField) login).getText());
-                server.setPassword(((TextField) password).getText());
+                host.setHostname(((TextField) hostname).getText());
+                host.setLogin(((TextField) login).getText());
+                host.setPassword(((TextField) password).getText());
             } else System.out.println("Error occurred, when parsing text boxes");
 
-            serverRepository.add(server);
+            hosts.add(host);
         }
+        property.SERVERS = hosts;
     }
 }

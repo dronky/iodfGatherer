@@ -23,6 +23,7 @@ public class ResultPanelController implements Initializable {
         int totalRows = GridPaneService.getRowCount(gridPane2) - 1;
 
         // TODO get iodf dettails and print it:
+        //  From property class after call main server class...
 
         for (int i = totalRows; i < serverRepository.getCount(); i++) {
             gridPane2.addRow(i + 1,

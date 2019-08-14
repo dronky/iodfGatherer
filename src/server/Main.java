@@ -1,5 +1,7 @@
 package server;
 
+import Entity.Host;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -10,11 +12,7 @@ public class Main {
         Set<Integer> portlist = new HashSet<>(prop.PORTS);
         Iterator<Integer> i = portlist.iterator();
 
-        for (String system : prop.SYSTEMS) {
-            String[] credentials = system.split(":");
-            String host = credentials[0];
-            String login = credentials[1];
-            String password = credentials[2];
+        for (Host server : prop.SERVERS) {
             int sockPort = i.next();
             i.remove();
 
@@ -29,7 +27,7 @@ public class Main {
             serverListener.start();
 
             Thread ftpThread = new Thread(() -> {
-                FtpClient ftpClient = new FtpClient(host, 21, login, password, prop.KEY, sockPort, prop.ADDRESS, prop.CONSOLE, prop.MSGCLASS);
+                FtpClient ftpClient = new FtpClient(server.getHostname(), 21, server.getLogin(), server.getPassword(), prop.KEY, sockPort, prop.ADDRESS, prop.CONSOLE, prop.MSGCLASS);
                 try {
                     ftpClient.open();
                     ftpClient.close();

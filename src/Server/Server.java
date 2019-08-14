@@ -1,3 +1,5 @@
+package Server;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,7 +12,7 @@ public class Server {
 
     public static void start(int port, String key) throws InterruptedException {
         long threadId = Thread.currentThread().getId();
-        System.out.println(threadId + ":Server started at port " + port);
+        System.out.println(threadId + ":Server.Server started at port " + port);
 //  стартуем сервер на порту 3345
         StringBuilder line = new StringBuilder();
         try (ServerSocket server = new ServerSocket(port)) {
@@ -40,7 +42,7 @@ public class Server {
             while (!client.isClosed()) {
                 line.setLength(0);
 
-//                System.out.println("Server reading from channel");
+//                System.out.println("Server.Server reading from channel");
 
 // readLine waiting newline char ('15'x in EBCDIC)
 // so if client not sending newline char, server hangs
@@ -50,7 +52,7 @@ public class Server {
 
                 //TODO DELETE USELESS KEY VERIFICATION
                 if (line.toString().trim().equalsIgnoreCase("KEY:" + key)) {
-//                    System.out.println("Server thread " + threadId + ":client is trusted");
+//                    System.out.println("Server.Server thread " + threadId + ":client is trusted");
                     continue;
                 }
 
@@ -58,8 +60,8 @@ public class Server {
 
 // инициализация проверки условия продолжения работы с клиентом по этому сокету по кодовому слову       - quit
                 if (line.toString().equalsIgnoreCase("quit") || line.toString().equalsIgnoreCase("null")) {
-                    System.out.println("Server thread " + threadId + ":Client closed connection ...");
-                    out.writeUTF("Server reply - " + line + " - OK");
+                    System.out.println("Server.Server thread " + threadId + ":Client closed connection ...");
+                    out.writeUTF("Server.Server reply - " + line + " - OK");
                     out.flush();
                     Thread.sleep(3000);
                     break;
@@ -67,7 +69,7 @@ public class Server {
 
                 if (line.toString().contains("$IODF:")) {
                     System.out.println("\033[0;32m" + line + "\033[0m");
-                } else System.out.println("\033[0m" + "Server thread " + threadId + ":" + line);
+                } else System.out.println("\033[0m" + "Server.Server thread " + threadId + ":" + line);
 
 
             }
@@ -83,7 +85,7 @@ public class Server {
             // хотя при многопоточном применении его закрывать не нужно
             // для возможности поставить этот серверный сокет обратно в ожидание нового подключения
 
-            System.out.println("Server thread " + threadId + ":Connections closed");
+            System.out.println("Server.Server thread " + threadId + ":Connections closed");
         } catch (IOException e) {
             e.printStackTrace();
         }

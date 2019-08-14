@@ -1,3 +1,5 @@
+package Server;
+
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
@@ -45,7 +47,7 @@ public class FtpClient {
         int reply = ftp.getReplyCode();
         if (!FTPReply.isPositiveCompletion(reply)) {
             ftp.disconnect();
-            throw new IOException("Exception in connecting to FTP Server");
+            throw new IOException("Exception in connecting to FTP Server.Server");
         }
 
         ftp.login(user, password);

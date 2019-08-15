@@ -1,7 +1,6 @@
 package controller;
 
 import Entity.Host;
-import Entity.ServerRepository;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,7 +32,7 @@ public class MainPanelController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Property property = Property.getInstance();
+        property = Property.getInstance();
         int totalRows = GridPaneService.getRowCount(gridPane1);
         for (int i = 0; i < property.SERVERS.size(); i++) {
             gridPane1.addRow(totalRows + i,
@@ -62,7 +61,7 @@ public class MainPanelController implements Initializable {
 
         //TODO pass system repo to result controller
 
-        Main.main();
+//        Main.main();
         showResultPanel((Stage) gridPane1.getScene().getWindow());
     }
 

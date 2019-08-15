@@ -1,5 +1,6 @@
 package service;
 
+import Entity.Host;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 
@@ -16,5 +17,10 @@ public class GridPaneService {
             }
         }
         return numRows;
+    }
+
+
+    public static void fillHostData(GridPane pane, Host host){
+
     }
 }

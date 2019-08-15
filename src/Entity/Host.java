@@ -7,20 +7,13 @@ public class Host {
     private String iodf;
     private String hardwareIodf;
     private String dateTime;
+    private int sockPort;
 
-    public Host(String hostname, String login, String password, String iodf, String hardwareIodf, String dateTime) {
+    public Host(String hostname, String login, String password, int port) {
         this.hostname = hostname;
         this.login = login;
         this.password = password;
-        this.iodf = iodf;
-        this.hardwareIodf = hardwareIodf;
-        this.dateTime = dateTime;
-    }
-
-    public Host(String hostname, String login, String password) {
-        this.hostname = hostname;
-        this.login = login;
-        this.password = password;
+        this.sockPort = port;
     }
 
     public Host() {
@@ -30,6 +23,15 @@ public class Host {
         this.iodf = null;
         this.hardwareIodf = null;
         this.dateTime = null;
+        this.sockPort = 0;
+    }
+
+    public int getSockPort() {
+        return sockPort;
+    }
+
+    public void setSockPort(int sockPort) {
+        this.sockPort = sockPort;
     }
 
     public String getHostname() {

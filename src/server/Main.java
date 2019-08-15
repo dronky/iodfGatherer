@@ -1,16 +1,17 @@
 package server;
 
 import Entity.Host;
+import javafx.application.Platform;
+import service.GridPaneService;
 
 import java.io.IOException;
 import java.util.*;
 
 public class Main {
-    public static void main() {
-        // Singleton
+    public static void main(GridPaneService gridPaneService) {
+        // Singleton property file
         Property prop = Property.getInstance();
-        Set<Integer> portlist = new HashSet<>(prop.PORTS);
-        Iterator<Integer> i = portlist.iterator();
+        Iterator<Integer> i = prop.PORTS.iterator();
 
         for (Host server : prop.SERVERS) {
             int sockPort = i.next();
@@ -18,7 +19,10 @@ public class Main {
 
             Thread serverListener = new Thread(() -> {
                 try {
-                    Server.start(sockPort, prop.KEY);
+                    Server.start(sockPort, prop.KEY, server);
+
+                    Platform.runLater(() -> gridPaneService.fillHostData(server));
+
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

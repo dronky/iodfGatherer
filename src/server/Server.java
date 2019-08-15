@@ -1,5 +1,8 @@
 package server;
 
+import Entity.Host;
+import service.GridPaneService;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,10 +13,9 @@ import java.util.Objects;
 
 public class Server {
 
-    public static void start(int port, String key) throws InterruptedException {
+    public static void start(int port, String key, Host host) throws InterruptedException {
         long threadId = Thread.currentThread().getId();
         System.out.println(threadId + ":server.server started at port " + port);
-//  стартуем сервер на порту 3345
         StringBuilder line = new StringBuilder();
         try (ServerSocket server = new ServerSocket(port)) {
 // становимся в ожидание подключения к сокету под именем - "client" на серверной стороне
@@ -68,10 +70,14 @@ public class Server {
                 }
 
                 if (line.toString().contains("$IODF:")) {
-                    System.out.println("\033[0;32m" + line + "\033[0m");
+//                    System.out.println("\033[0;32m" + line + "\033[0m");
+                    String iodf[] = line.toString().split(":");
+                    host.setIodf(iodf[2]);
+                    host.setHardwareIodf(iodf[3]);
+                    //TODO update rexx code
+                    //host.setDateTime(iodf[4]);
+
                 } else System.out.println("\033[0m" + "server.server thread " + threadId + ":" + line);
-
-
             }
 
             // закрываем сначала каналы сокета !

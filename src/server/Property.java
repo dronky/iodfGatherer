@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public final class Property {
 
@@ -15,20 +16,32 @@ public final class Property {
     static public String MSGCLASS = null;
     static public Set<Integer> PORTS = null;
     static public List<Host> SERVERS = null;
+    private int[] sockPorts = null;
 
     private static volatile Property instance;
 
     private Property() {
+        //fill default socket ports
+        sockPorts = IntStream.rangeClosed(3344, 3444).toArray();
 
         Properties property = new Properties();
         try {
             FileInputStream fis_properties = new FileInputStream("server.properties");
             property.load(fis_properties);
+
             String[] SYSTEMS = property.getProperty("SYSTEMS").split(";");
+            if (property.stringPropertyNames().contains("PORTS")) {
+                PORTS = Arrays.stream(property.getProperty("PORTS").split(";")).map(Integer::parseInt).collect(Collectors.toSet());
+                // PORTS MUST BE EQUAL TO SYSTEMS OTHERWISE USE DEFAULT PORT SET
+                if (PORTS.size() != SYSTEMS.length) setDefaultPorts();
+            } else {
+                setDefaultPorts();
+            }
+
             // CONVERT TO LIST
             SERVERS = new ArrayList<>();
-            parseHostsToList(SYSTEMS);
-            PORTS = Arrays.stream(property.getProperty("PORTS").split(";")).map(Integer::parseInt).collect(Collectors.toSet());
+            parseHostsToList(SYSTEMS, PORTS);
+
             KEY = property.getProperty("KEY");
             ADDRESS = property.getProperty("ADDRESS");
             CONSOLE = property.getProperty("CONSOLE");
@@ -38,17 +51,25 @@ public final class Property {
         }
     }
 
+    private void setDefaultPorts() {
+        PORTS = IntStream.rangeClosed(3344, 3444).boxed().collect(Collectors.toSet());
+    }
+
     public static void setServers(List<Host> servers) {
         Property.SERVERS = servers;
     }
 
-    private void parseHostsToList(String[] systems) {
+    private void parseHostsToList(String[] systems, Set<Integer> ports) {
         for (String system : systems) {
             String[] credentials = system.split(":");
             String host = credentials[0];
             String login = credentials[1];
             String password = credentials[2];
-            SERVERS.add(new Host(host,login,password));
+            Iterator<Integer> i = ports.iterator();
+            // TODO add check:
+            int port = i.next();
+
+            SERVERS.add(new Host(host, login, password, port));
         }
     }
 

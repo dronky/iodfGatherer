@@ -10,3 +10,5 @@ Setup server.properties:
 - ADDRESS = 10.200.11.111 - Socket server ip address (your PC)
 - CONSOLE = DEV99 - unique console name for issuing SDSF commands
 - MSGCLASS - you can specify specific msgclass for rexx client job submission (for example, msgclass with automatic job purge)
+
+See fx branch for Java FX based GUI application

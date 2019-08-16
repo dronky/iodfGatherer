@@ -193,9 +193,11 @@
    ADDRESS SDSF "ISFEXEC '/"command"' (WAIT"                            
    sw = word(ISFULOG.4,words(ISFULOG.4))                                
    hw = word(ISFULOG.7,words(ISFULOG.7))                                
+   d = word(ISFULOG.7,words(ISFULOG.7)-3)      
+   t = word(ISFULOG.7,words(ISFULOG.7)-2)      
  CALL ISFCALLS 'OFF'                       
  "CONSOLE DEACTIVATE" 
- return '$IODF:'mvsvar('SYSNAME')':'sw':'hw                                     
+ return '$IODF;'mvsvar('SYSNAME')';'sw';'hw';'d';'t         
                                                                         
  /*================================================================*/
  initSock:                                                              

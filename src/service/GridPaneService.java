@@ -26,27 +26,15 @@ public class GridPaneService {
         }
         return numRows;
     }
-
-
+    
     public void fillHostData(Host host){
         int totalRows = GridPaneService.getRowCount(this.gridPane);
         System.out.println("host update");
-
-//        for (int i = totalRows; i < prop.SERVERS.size(); i++) {
-//            gridPane2.addRow(i + 1,
-//                new TextField(prop.SERVERS.get(i).getHostname()),
-//                new TextField("IODF"),
-//                new TextField("HW IODF"),
-//                new TextField("Date Time"));
-//        }
 
             gridPane.addRow(totalRows + 1,
                 new TextField(host.getHostname()),
                 new TextField(host.getIodf()),
                 new TextField(host.getHardwareIodf()),
-                new TextField("datetime"));
-
-
-
+                new TextField(host.getDateTime()));
     }
 }

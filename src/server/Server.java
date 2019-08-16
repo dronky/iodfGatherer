@@ -69,13 +69,13 @@ public class Server {
                     break;
                 }
 
-                if (line.toString().contains("$IODF:")) {
+                if (line.toString().contains("$IODF;")) {
 //                    System.out.println("\033[0;32m" + line + "\033[0m");
-                    String iodf[] = line.toString().split(":");
+                    String iodf[] = line.toString().split(";");
                     host.setIodf(iodf[2]);
                     host.setHardwareIodf(iodf[3]);
+                    host.setDateTime(iodf[4] + " " + iodf[5]);
                     //TODO update rexx code
-                    //host.setDateTime(iodf[4]);
 
                 } else System.out.println("\033[0m" + "server.server thread " + threadId + ":" + line);
             }

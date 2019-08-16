@@ -2,16 +2,17 @@ package controller;
 
 import Entity.Host;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import server.Main;
 import server.Property;
 import service.GridPaneService;
 
@@ -29,18 +30,19 @@ public class MainPanelController implements Initializable {
 
     private Property property;
 
+//    Image imageProperty = new Image("/resource/img/gear.png", 40, 40, false, true);
+
+    @FXML
+    public Button btnProperty;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //UI
+//        btnProperty.setGraphic(new ImageView(imageProperty));
+        //
         property = Property.getInstance();
-        int totalRows = GridPaneService.getRowCount(gridPane1);
-        for (int i = 0; i < property.SERVERS.size(); i++) {
-            gridPane1.addRow(totalRows + i,
-                new TextField(property.SERVERS.get(i).getHostname()),
-                new TextField(property.SERVERS.get(i).getLogin()),
-                new TextField(property.SERVERS.get(i).getPassword()));
-        }
-
+        updateSystems();
     }
 
     @FXML
@@ -56,12 +58,56 @@ public class MainPanelController implements Initializable {
     }
 
     @FXML
+    protected void openPropertyAction() throws IOException {
+//        System.out.println("properties clicked");
+//        try {
+//            java.awt.Desktop.getDesktop().edit(property.FILE);
+//        } catch (IOException e) {
+//            // OPEN WITH NOTEPAD
+//            e.printStackTrace();
+//        }
+
+        showPropertiesPanel();
+    }
+
+
+    private void showPropertiesPanel() throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/view/properties_panel.fxml"));
+
+        Scene scene = new Scene(root, 600, 400);
+        Stage stage = new Stage();
+        property.setPropertySaved(false);
+        stage.setOnCloseRequest(e -> updateSystems());
+        stage.setOnHidden(e -> updateSystems());
+
+        stage.setTitle("Properties");
+        stage.setScene(scene);
+        stage.show();
+//        root.<PropertiesPanelController>getController().setTabCloseHandler(() -> root.getTabs().remove(tab));
+
+    }
+
+    //update textboxes
+    private void updateSystems() {
+        if (property.isPropertySaved()) {
+            int totalRows = GridPaneService.getRowCount(gridPane1);
+            while (totalRows > 1) {
+                gridPane1.getChildren().remove(totalRows * 3 - 3, totalRows * 3);
+                totalRows = GridPaneService.getRowCount(gridPane1);
+            }
+            for (int i = 0; i < property.SERVERS.size(); i++) {
+                gridPane1.addRow(i + 1,
+                    new TextField(property.SERVERS.get(i).getHostname()),
+                    new TextField(property.SERVERS.get(i).getLogin()),
+                    new TextField(property.SERVERS.get(i).getPassword()));
+            }
+        }
+    }
+
+
+    @FXML
     public void startServerAction(ActionEvent actionEvent) throws IOException {
         setSystems();
-
-        //TODO pass system repo to result controller
-
-//        Main.main();
         showResultPanel((Stage) gridPane1.getScene().getWindow());
     }
 

@@ -2,37 +2,51 @@ package server;
 
 import Entity.Host;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public final class Property {
 
+    static public File FILE = null;
     static public String KEY = null;
     static public String ADDRESS = null;
     static public String CONSOLE = null;
     static public String MSGCLASS = null;
     static public Set<Integer> PORTS = null;
+    static public String[] SYSTEMS = null;
     static public List<Host> SERVERS = null;
-    private int[] sockPorts = null;
+    private boolean propertySaved;
+    Properties property = null;
 
     private static volatile Property instance;
 
-    private Property() {
-        //fill default socket ports
-        sockPorts = IntStream.rangeClosed(3344, 3444).toArray();
+    private Property() throws IOException {
 
-        Properties property = new Properties();
+        property = new Properties();
+        reReadFile();
+        propertySaved = true;
+    }
+
+    public boolean isPropertySaved() {
+        return propertySaved;
+    }
+
+    public void setPropertySaved(boolean propertySaved) {
+        this.propertySaved = propertySaved;
+    }
+
+    public void reReadFile() {
         try {
-            FileInputStream fis_properties = new FileInputStream("server.properties");
-            property.load(fis_properties);
+            FILE = new File("server.properties");
+            FileInputStream fileInputStream = new FileInputStream(FILE);
+            property.load(fileInputStream);
 
-            String[] SYSTEMS = property.getProperty("SYSTEMS").split(";");
+            SYSTEMS = property.getProperty("SYSTEMS").split(";");
             if (property.stringPropertyNames().contains("PORTS")) {
                 PORTS = Arrays.stream(property.getProperty("PORTS").split(";")).map(Integer::parseInt).collect(Collectors.toSet());
-                // PORTS MUST BE EQUAL TO SYSTEMS OTHERWISE USE DEFAULT PORT SET
+                // PORTS COUNT MUST BE EQUAL TO SYSTEMS OTHERWISE USE DEFAULT PORT SET
                 if (PORTS.size() != SYSTEMS.length) setDefaultPorts();
             } else {
                 setDefaultPorts();
@@ -51,6 +65,43 @@ public final class Property {
         }
     }
 
+    public void updateSystems(String systems) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(FILE);
+        FileOutputStream fileOutputStream = new FileOutputStream(FILE);
+        property.load(fileInputStream);
+        property.setProperty("SYSTEMS", systems);
+        property.save(fileOutputStream,"");
+        propertySaved = true;
+    }
+
+    public void updateAddress(String address) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(FILE);
+        FileOutputStream fileOutputStream = new FileOutputStream(FILE);
+        property.load(fileInputStream);
+        property.setProperty("ADDRESS", address);
+        property.save(fileOutputStream,"");
+        propertySaved = true;
+    }
+
+    public void updateConsole(String console) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(FILE);
+        FileOutputStream fileOutputStream = new FileOutputStream(FILE);
+        property.load(fileInputStream);
+        property.setProperty("CONSOLE", console);
+        property.save(fileOutputStream,"");
+        propertySaved = true;
+    }
+
+    public void updateMsgclass(String msgclass) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(FILE);
+        FileOutputStream fileOutputStream = new FileOutputStream(FILE);
+        property.load(fileInputStream);
+        property.setProperty("MSGCLASS", msgclass);
+        property.save(fileOutputStream,"");
+        propertySaved = true;
+    }
+
+
     private void setDefaultPorts() {
         PORTS = IntStream.rangeClosed(3344, 3444).boxed().collect(Collectors.toSet());
     }
@@ -61,7 +112,7 @@ public final class Property {
 
     private void parseHostsToList(String[] systems, Set<Integer> ports) {
         for (String system : systems) {
-            String[] credentials = system.split(":");
+            String[] credentials = system.split(" ");
             String host = credentials[0];
             String login = credentials[1];
             String password = credentials[2];
@@ -88,7 +139,11 @@ public final class Property {
             synchronized (Property.class) {
                 result = instance;
                 if (result == null) {
-                    instance = result = new Property();
+                    try {
+                        instance = result = new Property();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

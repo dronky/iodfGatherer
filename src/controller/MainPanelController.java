@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import server.Property;
@@ -74,9 +75,10 @@ public class MainPanelController implements Initializable {
     private void showPropertiesPanel() throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/view/properties_panel.fxml"));
 
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 600, 300);
         Stage stage = new Stage();
         property.setPropertySaved(false);
+        stage.getIcons().add(new Image("/resource/img/icon.png"));
         stage.setOnCloseRequest(e -> updateSystems());
         stage.setOnHidden(e -> updateSystems());
 
@@ -114,7 +116,7 @@ public class MainPanelController implements Initializable {
     private void showResultPanel(Stage stage) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/view/result_panel.fxml"));
         Scene scene = new Scene(root, 600, 400);
-
+        stage.getIcons().add(new Image("/resource/img/icon.png"));
         stage.setTitle("IODF gatherer results");
         stage.setScene(scene);
         stage.show();

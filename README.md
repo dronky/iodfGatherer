@@ -14,6 +14,6 @@ rexx client + java host based on sockets.
 3. Wait when it collect IODF information from all systems:
  software iodf, hardware iodf, date and time of activation
 
-![Alt text](doc/1.png?raw=true "Configure properties")
-![Alt text](doc/2.png?raw=true "Start app")
-![Alt text](doc/3.png?raw=true "Wait for results")
+![Alt text](docs/1.png?raw=true "Configure properties")
+![Alt text](docs/2.png?raw=true "Start app")
+![Alt text](docs/3.png?raw=true "Wait for results")

@@ -10,7 +10,6 @@ import java.util.stream.IntStream;
 public final class Property {
 
     static public File FILE = null;
-    static public String KEY = null;
     static public String ADDRESS = null;
     static public String CONSOLE = null;
     static public String MSGCLASS = null;
@@ -56,7 +55,6 @@ public final class Property {
             SERVERS = new ArrayList<>();
             parseHostsToList(SYSTEMS, PORTS);
 
-            KEY = property.getProperty("KEY");
             ADDRESS = property.getProperty("ADDRESS");
             CONSOLE = property.getProperty("CONSOLE");
             MSGCLASS = property.getProperty("MSGCLASS");

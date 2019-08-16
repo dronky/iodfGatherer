@@ -14,12 +14,14 @@ public class Main {
         Iterator<Integer> i = prop.PORTS.iterator();
 
         for (Host server : prop.SERVERS) {
+            // Generate random key
+            String key = Long.toHexString(Double.doubleToLongBits(Math.random()));
             int sockPort = i.next();
             i.remove();
 
             Thread serverListener = new Thread(() -> {
                 try {
-                    Server.start(sockPort, prop.KEY, server);
+                    Server.start(sockPort, key, server);
 
                     Platform.runLater(() -> gridPaneService.fillHostData(server));
 
@@ -31,7 +33,7 @@ public class Main {
             serverListener.start();
 
             Thread ftpThread = new Thread(() -> {
-                FtpClient ftpClient = new FtpClient(server.getHostname(), 21, server.getLogin(), server.getPassword(), prop.KEY, sockPort, prop.ADDRESS, prop.CONSOLE, prop.MSGCLASS);
+                FtpClient ftpClient = new FtpClient(server.getHostname(), 21, server.getLogin(), server.getPassword(), key, sockPort, prop.ADDRESS, prop.CONSOLE, prop.MSGCLASS);
                 try {
                     ftpClient.open();
                     ftpClient.close();
